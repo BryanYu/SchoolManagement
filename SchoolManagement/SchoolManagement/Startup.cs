@@ -45,30 +45,46 @@ namespace SchoolManagement
             //    context.Response.ContentType = "text/plain;charset=utf-8";
             //    await context.Response.WriteAsync("從第二個Middleware的Hello world");
             //});
+            
+            //app.Use(async (context, next) =>
+            //{
+            //    logger.LogInformation("MW1:傳入請求");
+            //    await next();
+            //    logger.LogInformation("MW1:回應請求");
+            //});
+
+            //app.Use(async (context, next) =>
+            //{
+            //    logger.LogInformation("MW2:傳入請求");
+            //    await next();
+            //    logger.LogInformation("MW2:回應請求");
+
+            //});
+
+            //app.Run(async (context) =>
+            //{
+            //    context.Response.ContentType = "text/plain;charset=utf-8";
+            //    await context.Response.WriteAsync("MW3:處理請求並生成回應");
+            //    logger.LogInformation("MW3:處理請求並生成回應");
+            //});
+
+            //var defaultOptions = new DefaultFilesOptions();
+            //defaultOptions.DefaultFileNames.Clear();
+            //defaultOptions.DefaultFileNames.Add("custom.html");
+            
+            //app.UseDefaultFiles(defaultOptions);
+            //app.UseStaticFiles();
 
 
-            app.Use(async (context, next) =>
-            {
-                logger.LogInformation("MW1:傳入請求");
-                await next();
-                logger.LogInformation("MW1:回應請求");
-            });
-
-            app.Use(async (context, next) =>
-            {
-                logger.LogInformation("MW2:傳入請求");
-                await next();
-                logger.LogInformation("MW2:回應請求");
-
-            });
+            var fileServerOptions = new FileServerOptions();
+            fileServerOptions.DefaultFilesOptions.DefaultFileNames.Clear();
+            fileServerOptions.DefaultFilesOptions.DefaultFileNames.Add("custom.html");
+            app.UseFileServer(fileServerOptions);
 
             app.Run(async (context) =>
             {
-                context.Response.ContentType = "text/plain;charset=utf-8";
-                await context.Response.WriteAsync("MW3:處理請求並生成回應");
-                logger.LogInformation("MW3:處理請求並生成回應");
+                await context.Response.WriteAsync("Hello world");
             });
-
         }
     }
 }
