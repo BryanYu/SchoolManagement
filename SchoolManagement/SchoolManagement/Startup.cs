@@ -31,7 +31,11 @@ namespace SchoolManagement
         {
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+                var options = new DeveloperExceptionPageOptions
+                {
+                    SourceCodeLineCount = 3
+                };
+                app.UseDeveloperExceptionPage(options);
             }
 
             //app.Run(async (context) =>
@@ -76,13 +80,15 @@ namespace SchoolManagement
             //app.UseStaticFiles();
 
 
-            var fileServerOptions = new FileServerOptions();
-            fileServerOptions.DefaultFilesOptions.DefaultFileNames.Clear();
-            fileServerOptions.DefaultFilesOptions.DefaultFileNames.Add("custom.html");
-            app.UseFileServer(fileServerOptions);
+            //var fileServerOptions = new FileServerOptions();
+            //fileServerOptions.DefaultFilesOptions.DefaultFileNames.Clear();
+            //fileServerOptions.DefaultFilesOptions.DefaultFileNames.Add("custom.html");
+            //app.UseFileServer(fileServerOptions);
 
+            app.UseFileServer();
             app.Run(async (context) =>
             {
+                throw new Exception("µo¥Í²§±`");
                 await context.Response.WriteAsync("Hello world");
             });
         }
