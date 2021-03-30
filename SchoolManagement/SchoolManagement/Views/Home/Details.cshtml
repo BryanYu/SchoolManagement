@@ -1,20 +1,27 @@
-﻿@using SchoolManagement.Models;
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "學生詳情";
+}
 <html>
 <head>
     <title></title>
 </head>
 <body>
-<h3>@ViewBag.PageTitle</h3>
+<h3>@Model.PageTitle</h3>
 <div>
-    姓名: @Model.Name
+    姓名: @Model.Student.Name
 </div>
 <div>
-    電子郵件: @Model.Email
-</div>
-
-<div>
-    主修: @Model.Major
+    電子郵件: @Model.Student.Email
 </div>
 
+<div>
+    主修: @Model.Student.Major
+</div>
+    
+@section Scripts
+{
+    <script src="~/js/CustomerScript.js"></script>
+}
 </body>
 </html>

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using SchoolManagement.DataRepositories;
+using SchoolManagement.ViewModels;
 
 namespace SchoolManagement.Controllers
 {
@@ -17,17 +18,21 @@ namespace SchoolManagement.Controllers
             _studentRepository = studentRepository;
         }
 
-        public string Index()
+        public ViewResult Index()
         {
-            var student = _studentRepository.GetStudent(1);
-            return student.Name;
+            var students = this._studentRepository.GetAllStudents();
+            return View(students);
         }
 
         public ViewResult Details()
         {
             var model = this._studentRepository.GetStudent(1);
-            ViewBag.PageTitle = "學生詳情";
-            return View(model);
+            var homeDetailsViewModel = new HomeDetailsViewModel
+            {
+                PageTitle = "學生詳情",
+                Student = model
+            };
+            return View(homeDetailsViewModel);
         }
     }
 }

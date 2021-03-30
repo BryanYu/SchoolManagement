@@ -26,5 +26,10 @@ namespace SchoolManagement.DataRepositories
             var student = _students.FirstOrDefault(item => item.Id == id);
             return student;
         }
+
+        public IEnumerable<Student> GetAllStudents()
+        {
+            return _students;
+        }
     }
 }

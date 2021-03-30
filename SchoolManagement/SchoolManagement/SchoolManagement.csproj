@@ -6,8 +6,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\js\CustomerScript.js" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="wwwroot\css\" />
-    <Folder Include="wwwroot\js\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\js\CustomerScript.js" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties properties_4launchsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
