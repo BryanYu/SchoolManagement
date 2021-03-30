@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using SchoolManagement.DataRepositories;
 
 namespace SchoolManagement
 {
@@ -25,6 +26,7 @@ namespace SchoolManagement
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews(item => item.EnableEndpointRouting = false);
+            services.AddSingleton<IStudentRepository, MockStudentRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
