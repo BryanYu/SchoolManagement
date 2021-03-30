@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using SchoolManagement.DataRepositories;
 
 namespace SchoolManagement.Controllers
@@ -20,6 +21,13 @@ namespace SchoolManagement.Controllers
         {
             var student = _studentRepository.GetStudent(1);
             return student.Name;
+        }
+
+        public ViewResult Details()
+        {
+            var model = this._studentRepository.GetStudent(1);
+            ViewBag.PageTitle = "學生詳情";
+            return View(model);
         }
     }
 }
