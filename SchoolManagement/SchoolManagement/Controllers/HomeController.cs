@@ -24,6 +24,11 @@ namespace SchoolManagement.Controllers
             return View(students);
         }
 
+        public ViewResult Create()
+        {
+            return View();
+        }
+
         public ViewResult Details()
         {
             var model = this._studentRepository.GetStudent(1);
