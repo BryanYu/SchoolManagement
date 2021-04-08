@@ -1,5 +1,92 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@using SchoolManagement.Models
+@using SchoolManagement.DataRepositories
+@inject IStudentRepository _studentRepository
+@model StudentEditViewModel
 @{
+    ViewBag.Title = "編輯學生信息";
+    var photoPath = "~/images/avatars/Image1.png";
+    if (Model.ExistingPhotoPath != null)
+    {
+        photoPath = "~/images/avatars/" + Model.ExistingPhotoPath;
+    }
 }
+
+<form enctype="multipart/form-data" asp-controller="Home" asp-action="Create" method="post" class="mt-3">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <input hidden asp-for="Id"/>
+    <input hidden asp-for="ExistingPhotoPath"/>
+    
+
+    <div class="form-group row">
+        <label asp-for="Name" class="col-sm-2 col-form-label"></label>
+        <div class="col-sm-10">
+            <input asp-for="Name" class="form-control" placeholder="Name" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label asp-for="Email" class="col-sm-2 col-form-label"></label>
+        <div class="col-sm-10">
+            <input asp-for="Email" class="form-control" placeholder="Email" />
+            <span asp-validation-for="Email"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label asp-for="Major" class="col-sm-2 col-form-label"></label>
+        <div class="col-sm-10">
+            <select asp-for="Major" class="custom-select mr-sm-2" asp-items="Html.GetEnumSelectList<MajorEnum>()">
+                <option value="">請選擇</option>
+            </select>
+            <span asp-validation-for="Major" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label asp-for="Photos" class="col-sm-2 col-form-label"></label>
+        <div class="col-sm-10">
+            <div class="custom-file">
+                <input asp-for="Photos" multiple class="form-control custom-file-input" />
+                <label class="custom-file-label">單擊修改圖片</label>
+            </div>
+        </div>
+    </div>
+    
+    <div class="form-group row col-sm-4 offset-4">
+        <img class="imageThumbnail" src="@photoPath" asp-append-version="true"/>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-10">
+            <button type="submit" class="btn btn-primary">更新</button>
+            <a asp-action="Index" asp-controller="Home" class="btn btn-primary">取消</a>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-10">
+            <button type="submit" class="btn btn-primary">創建</button>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <div class="col-sm-10">
+            學生總人數: @_studentRepository.GetAllStudents().Count().ToString()
+        </div>
+    </div>
+    @section Scripts
+    {
+        <script>
+            $(document).ready(function() {
+                $(".custom-file-input").on("change",
+                    function () {
+                        var fileLabel = $(this).next('.custom-file-label');
+                        var files = $(this)[0].files;
+                        if (files.length > 1) {
+                            fileLabel.html('您已經選擇:' + files.length + '個文件');
+                        }
+                        else if (files.length === 1) {
+                            fileLabel.html(files[0].name);
+                        }
+
+                    });
+            })
+        </script>
+    }
+</form>
