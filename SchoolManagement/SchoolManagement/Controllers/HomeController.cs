@@ -36,7 +36,7 @@ namespace SchoolManagement.Controllers
         {
             if (ModelState.IsValid)
             {
-                Student newStudent = _studentRepository.Add(student);
+                Student newStudent = _studentRepository.Insert(student);
                 return RedirectToAction("Details", new { id = newStudent.Id });
             }
 
@@ -46,7 +46,7 @@ namespace SchoolManagement.Controllers
 
         public ViewResult Details(int id)
         {
-            var model = this._studentRepository.GetStudent(id);
+            var model = this._studentRepository.GetStudentById(id);
             var homeDetailsViewModel = new HomeDetailsViewModel
             {
                 PageTitle = "學生詳情",

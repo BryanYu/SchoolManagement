@@ -21,7 +21,7 @@ namespace SchoolManagement.DataRepositories
             };
         }
 
-        public Student GetStudent(int id)
+        public Student GetStudentById(int id)
         {
             var student = _students.FirstOrDefault(item => item.Id == id);
             return student;
@@ -32,10 +32,34 @@ namespace SchoolManagement.DataRepositories
             return _students;
         }
 
-        public Student Add(Student student)
+        public Student Insert(Student student)
         {
             student.Id = _students.Max(item => item.Id) + 1;
             _students.Add(student);
+            return student;
+        }
+
+        public Student Update(Student updateStudent)
+        {
+            Student student = _students.FirstOrDefault(item => item.Id == updateStudent.Id);
+            if (student != null)
+            {
+                student.Name = updateStudent.Name;
+                student.Email = updateStudent.Email;
+                student.Major = updateStudent.Major;
+            }
+
+            return student;
+        }
+
+        public Student Delete(int id)
+        {
+            Student student = _students.FirstOrDefault(item => item.Id == id);
+            if (student != null)
+            {
+                _students.Remove(student);
+            }
+
             return student;
         }
     }

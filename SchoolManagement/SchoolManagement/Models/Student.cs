@@ -19,5 +19,7 @@ namespace SchoolManagement.Models
         [RegularExpression(@"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", ErrorMessage = "電子郵件格式不正確")]
         public string Email { get; set; }
 
+        public string PhotoPath { get; set; }
+
     }
 }
