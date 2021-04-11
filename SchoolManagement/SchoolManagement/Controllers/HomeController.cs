@@ -4,6 +4,7 @@ using System.IO;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SchoolManagement.DataRepositories;
 using SchoolManagement.Models;
 using SchoolManagement.ViewModels;
@@ -66,18 +67,32 @@ namespace SchoolManagement.Controllers
 
         public ViewResult Details(int id)
         {
-            var model = this._studentRepository.GetStudentById(id);
-            var homeDetailsViewModel = new HomeDetailsViewModel
+            var student = this._studentRepository.GetStudentById(id);
+            if (student == null)
             {
-                PageTitle = "學生詳情",
-                Student = model
-            };
+                Response.StatusCode = 404;
+                return View("StudentNotFound", id);
+            }
+
+            var homeDetailsViewModel = new HomeDetailsViewModel
+                {
+                    PageTitle = "學生詳情",
+                    Student = student
+                };
+            
+
             return View(homeDetailsViewModel);
         }
 
+        [HttpGet]
         public ViewResult Edit(int id)
         {
             var student = _studentRepository.GetStudentById(id);
+            if (student == null)
+            {
+                Response.StatusCode = 404;
+                return View("StudentNotFound", id);
+            }
             var viewModel = new StudentEditViewModel
             {
                 Id = student.Id,
@@ -88,7 +103,6 @@ namespace SchoolManagement.Controllers
             };
 
             return View(viewModel);
-            return View();
         }
 
         [HttpPost]

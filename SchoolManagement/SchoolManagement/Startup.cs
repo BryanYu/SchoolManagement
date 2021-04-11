@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -39,6 +40,12 @@ namespace SchoolManagement
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+            }
+            else if(env.IsStaging() || env.IsProduction() || env.IsEnvironment("UAT"))
+            {
+                app.UseExceptionHandler("/Error");
+                app.UseStatusCodePagesWithReExecute("/Error/{0}");
+                
             }
 
             app.UseStaticFiles();
