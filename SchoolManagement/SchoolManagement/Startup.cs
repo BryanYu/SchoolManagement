@@ -8,7 +8,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -29,7 +31,11 @@ namespace SchoolManagement
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
+            services.AddControllersWithViews(config =>
+            {
+                var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+                config.Filters.Add(new AuthorizeFilter(policy));
+            });
             services.AddScoped<IStudentRepository, SQLStudentRepository>();
             services.AddDbContextPool<AppDbContext>(option =>
                 option.UseSqlServer(_config.GetConnectionString("StudentDBConnection")));
@@ -45,11 +51,11 @@ namespace SchoolManagement
             {
                 app.UseDeveloperExceptionPage();
             }
-            else if(env.IsStaging() || env.IsProduction() || env.IsEnvironment("UAT"))
+            else if (env.IsStaging() || env.IsProduction() || env.IsEnvironment("UAT"))
             {
                 app.UseExceptionHandler("/Error");
                 app.UseStatusCodePagesWithReExecute("/Error/{0}");
-                
+
             }
 
             app.UseStaticFiles();
