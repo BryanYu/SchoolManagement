@@ -16,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SchoolManagement.DataRepositories;
 using SchoolManagement.Infrastructure;
+using SchoolManagement.Models;
 
 namespace SchoolManagement
 {
@@ -39,7 +40,7 @@ namespace SchoolManagement
             services.AddScoped<IStudentRepository, SQLStudentRepository>();
             services.AddDbContextPool<AppDbContext>(option =>
                 option.UseSqlServer(_config.GetConnectionString("StudentDBConnection")));
-            services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<AppDbContext>()
+            services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<AppDbContext>()
                 .AddErrorDescriber<CustomIdentityErrorDescriber>();
 
         }
