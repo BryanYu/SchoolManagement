@@ -3,12 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using SchoolManagement.Models;
 using SchoolManagement.ViewModels;
 
 namespace SchoolManagement.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
         private readonly RoleManager<IdentityRole> _roleManager;
@@ -167,6 +169,13 @@ namespace SchoolManagement.Controllers
             }
 
             return RedirectToAction("EditRole", new {Id = roleId});
+        }
+
+        [HttpGet]
+        public IActionResult ListUsers()
+        {
+            var users = _userManager.Users.ToList();
+            return View(users);
         }
     }
 }
