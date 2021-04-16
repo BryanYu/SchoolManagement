@@ -1,13 +1,12 @@
-﻿@model int
-@{
+﻿@{
     ViewBag.Title = "404錯誤";
 }
 
 <div class="alert alert-danger mt-1 mb-1">
     <h4>400 Not Found錯誤:</h4>
-    <hr/>
+    <hr />
     <h5>
-        查詢不到學生id為 @Model 的訊息
+        @ViewBag.ErrorMessage
     </h5>
 </div>
 <a asp-controller="Home" asp-action="Index" class="btn btn-outline-success" style="width: auto">

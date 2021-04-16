@@ -16,8 +16,17 @@
                 <h5 class="card-title">@role.Name</h5>
             </div>
             <div class="card-footer">
-                <a asp-controller="Admin" asp-action="EditRole" asp-route-id="@role.Id" class="btn btn-primary">編輯</a>
-                <a href="#" class="btn btn-primary">刪除</a>
+                <form method="post" asp-action="DeleteRole" asp-route-id="@role.Id">
+                    <a asp-action="EditRole" asp-controller="Admin" asp-route-id="@role.Id" class="btn btn-primary">編輯</a>
+                    <span id="confirmDeleteSpan_@role.Id" style="display: none">
+                        <span>你確定要刪除?</span>
+                        <button type="submit" class="btn btn-primary">是</button>
+                        <a href="#" class="btn btn-primary" onclick="confirmDelete('@role.Id',false)">否</a>
+                    </span>
+                    <span id="deleteSpan_@role.Id">
+                        <a href="#" class="btn btn-primary" onclick="confirmDelete('@role.Id', true)">刪除</a>
+                    </span>
+                </form>
             </div>
         </div>
     }
@@ -31,4 +40,8 @@ else
             <a class="btn btn-primary" style="width: auto" asp-controller="Admin" asp-action="CreateRole">新增角色</a>
         </div>
     </div>
+}
+@section Scripts
+{
+    <script src="~/js/CustomerScript.js" asp-append-version="true"></script>
 }

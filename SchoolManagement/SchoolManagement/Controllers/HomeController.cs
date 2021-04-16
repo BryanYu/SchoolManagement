@@ -72,8 +72,8 @@ namespace SchoolManagement.Controllers
             var student = this._studentRepository.GetStudentById(id);
             if (student == null)
             {
-                Response.StatusCode = 404;
-                return View("StudentNotFound", id);
+                ViewBag.ErrorMessage = $"學生Id={id}資料不存在";
+                return View("NotFound");
             }
 
             var homeDetailsViewModel = new HomeDetailsViewModel
@@ -92,8 +92,8 @@ namespace SchoolManagement.Controllers
             var student = _studentRepository.GetStudentById(id);
             if (student == null)
             {
-                Response.StatusCode = 404;
-                return View("StudentNotFound", id);
+                ViewBag.ErrorMessage = $"學生Id={id}資料不存在";
+                return View("NotFound");
             }
             var viewModel = new StudentEditViewModel
             {
