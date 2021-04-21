@@ -1,0 +1,15 @@
+﻿@if (ViewBag.ErrorTitle == null)
+{
+    <h3 class="text-danger">
+        發生錯誤
+    </h3>
+
+    <h5 class="text-info">
+        請聯繫客服
+    </h5>
+}
+else
+{
+    <h1 class="text-danger">@ViewBag.ErrorTitle</h1>
+    <h6 class="text-danger">@ViewBag.ErrorMessage</h6>
+}

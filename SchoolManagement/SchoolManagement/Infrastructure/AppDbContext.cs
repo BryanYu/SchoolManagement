@@ -19,6 +19,13 @@ namespace SchoolManagement.Infrastructure
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Seed();
+
+            var foreignKeys = modelBuilder.Model.GetEntityTypes().SelectMany(item => item.GetForeignKeys());
+
+            foreach (var foreignKey in foreignKeys)
+            {
+                foreignKey.DeleteBehavior = DeleteBehavior.Restrict;
+            }
         }
 
         public DbSet<Student> Students { get; set; }

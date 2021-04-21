@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SchoolManagement.Models;
 using SchoolManagement.ViewModels;
 
@@ -15,11 +17,13 @@ namespace SchoolManagement.Controllers
     {
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<AdminController> _logger;
 
-        public AdminController(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager)
+        public AdminController(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, ILogger<AdminController> logger)
         {
             _roleManager = roleManager;
             _userManager = userManager;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -277,15 +281,28 @@ namespace SchoolManagement.Controllers
             }
             else
             {
-                var result = await _roleManager.DeleteAsync(role);
-                if (result.Succeeded)
-                {
-                    return RedirectToAction("ListRoles");
-                }
 
-                foreach (var error in result.Errors)
+                try
                 {
-                    ModelState.AddModelError("", error.Description);
+
+
+                    var result = await _roleManager.DeleteAsync(role);
+                    if (result.Succeeded)
+                    {
+                        return RedirectToAction("ListRoles");
+                    }
+
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                }
+                catch (DbUpdateException e)
+                {
+                    _logger.LogError($"發生異常:{e}");
+                    ViewBag.ErrorTitle = $"角色:{role.Name}正在被使用中";
+                    ViewBag.ErrorMessage = $"無法刪除{role.Name}角色，因為此角色已存在用戶，請先刪除用戶再刪除角色";
+                    return View("Error");
                 }
             }
 

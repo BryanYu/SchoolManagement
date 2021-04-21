@@ -269,7 +269,7 @@ namespace SchoolManagement.Migrations
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -278,7 +278,7 @@ namespace SchoolManagement.Migrations
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -287,7 +287,7 @@ namespace SchoolManagement.Migrations
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -296,13 +296,13 @@ namespace SchoolManagement.Migrations
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -311,7 +311,7 @@ namespace SchoolManagement.Migrations
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 #pragma warning restore 612, 618
