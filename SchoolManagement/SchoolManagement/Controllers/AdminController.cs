@@ -1,10 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SchoolManagement.Models;
@@ -307,6 +310,125 @@ namespace SchoolManagement.Controllers
             }
 
             return View("ListRoles");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ManageUserRoles(string userId)
+        {
+            ViewBag.userId = userId;
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                ViewBag.ErrorMessage = $"無法找到ID為{userId}的資料";
+                return View("NotFound");
+            }
+
+            var model = new List<RolesInUserViewModel>();
+            foreach (var role in _roleManager.Roles)
+            {
+                var rolesInUserModel = new RolesInUserViewModel
+                {
+                    RoleId = role.Id,
+                    RoleName = role.Name
+                };
+                rolesInUserModel.IsSelected = await _userManager.IsInRoleAsync(user, role.Name);
+
+                model.Add(rolesInUserModel);
+            }
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ManageUserRoles(List<RolesInUserViewModel> model, string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                ViewBag.ErrorMessage = $"無法找到ID為{userId}的資料";
+                return View("NotFound");
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+            var result = await _userManager.RemoveFromRolesAsync(user, roles);
+
+            if (!result.Succeeded)
+            {
+                ModelState.AddModelError("", "無法刪除用戶中現有角色");
+                return View(model);
+            }
+
+            result = await _userManager.AddToRolesAsync(user,
+                model.Where(item => item.IsSelected).Select(item2 => item2.RoleName));
+
+            if (!result.Succeeded)
+            {
+                ModelState.AddModelError("","無法新增指定的角色");
+                return View(model);
+            }
+
+            return RedirectToAction("EditUser", new {Id = userId});
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ManageUserClaims(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                ViewBag.ErrorMessage = $"無法找到ID為{userId}的用戶";
+                return View("NotFound");
+            }
+
+            var existingUserClaims = await _userManager.GetClaimsAsync(user);
+            var model = new UserClaimsViewModel
+            {
+                UserId = userId
+            };
+
+            foreach (var claim in ClaimsStore.AllClaims)
+            {
+                var userClaim = new UserClaim
+                {
+                    ClaimType = claim.Type
+                };
+                userClaim.IsSelected = existingUserClaims.Any(item => item.Type == claim.Type);
+
+                model.Claims.Add(userClaim);
+            }
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ManageUserClaims(UserClaimsViewModel model)
+        {
+            var user = await _userManager.FindByIdAsync(model.UserId);
+
+            if (user == null)
+            {
+                ViewBag.ErrorMessage = $"無法找到ID為{model.UserId}的用戶";
+                return View("NotFound");
+            }
+
+            var claims = await _userManager.GetClaimsAsync(user);
+            var result = await _userManager.RemoveClaimsAsync(user, claims);
+
+            if (!result.Succeeded)
+            {
+                ModelState.AddModelError("","無法刪除用戶聲明");
+                return View(model);
+            }
+
+            result = await _userManager.AddClaimsAsync(user,
+                model.Claims.Where(item => item.IsSelected)
+                    .Select(item2 => new Claim(item2.ClaimType, item2.ClaimType)));
+
+            if (!result.Succeeded)
+            {
+                ModelState.AddModelError("","無法向用戶新增指定的聲明");
+                return View(model);
+            }
+
+            return RedirectToAction("EditUser", new {Id = model.UserId});
         }
     }
 }
