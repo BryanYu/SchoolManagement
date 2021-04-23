@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using SchoolManagement.DataRepositories;
 using SchoolManagement.Infrastructure;
 using SchoolManagement.Models;
+using SchoolManagement.Security;
 
 namespace SchoolManagement
 {
@@ -42,7 +43,32 @@ namespace SchoolManagement
                 option.UseSqlServer(_config.GetConnectionString("StudentDBConnection")));
             services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<AppDbContext>()
                 .AddErrorDescriber<CustomIdentityErrorDescriber>();
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("DeleteRolePolicy", policy => policy.RequireClaim("Delete Role"));
+                options.AddPolicy("EditRolePolicy",
+                    policy =>
+                        policy.AddRequirements(new ManageAdminRolesAndClaimsRequirement()));
+                options.AddPolicy("AdminRolePolicy", policy => policy.RequireRole("Admin"));
+                options.AddPolicy("SuperAdminPolicy", policy => policy.RequireRole("Admin", "User", "SuperManager"));
+            });
 
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.AccessDeniedPath = new PathString("/Admin/AccessDenied");
+            });
+
+            services.AddHttpContextAccessor();
+            services.AddSingleton<IAuthorizationHandler, CanEditOnlyOtherAdminRolesAndClaimsHandler>();
+            services.AddSingleton<IAuthorizationHandler, SuperAdminHandler>();
+
+        }
+
+        private bool AuthorizeAccess(AuthorizationHandlerContext context)
+        {
+            return context.User.IsInRole("Admin") &&
+                   context.User.HasClaim(claim => claim.Type == "Edit Role" && claim.Value == "true") ||
+                   context.User.IsInRole("Super Admin");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

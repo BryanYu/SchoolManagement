@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace SchoolManagement.ViewModels
@@ -19,13 +20,13 @@ namespace SchoolManagement.ViewModels
 
         public string City { get; set; }
 
-        public List<string> Claims { get; set; }
+        public List<Claim> Claims { get; set; }
 
         public List<string> Roles{ get; set; }
 
         public EditUserViewModel()
         {
-            Claims = new List<string>();
+            Claims = new List<Claim>();
             Roles = new List<string>();
         }
     }

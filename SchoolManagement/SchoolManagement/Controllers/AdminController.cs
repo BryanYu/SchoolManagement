@@ -95,6 +95,7 @@ namespace SchoolManagement.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "EditRolePolicy")]
         public async Task<IActionResult> EditRole(EditRoleViewModel model)
         {
             var role = await _roleManager.FindByIdAsync(model.Id);
@@ -195,7 +196,7 @@ namespace SchoolManagement.Controllers
                 return View("NotFound");
             }
 
-            var userClaims = await _userManager.GetClaimsAsync(user);
+            var userClaims = (await _userManager.GetClaimsAsync(user)).ToList();
             var userRoles = await _userManager.GetRolesAsync(user);
 
             var model = new EditUserViewModel
@@ -204,7 +205,7 @@ namespace SchoolManagement.Controllers
                 Email = user.Email,
                 UserName = user.UserName,
                 City = user.City,
-                Claims = userClaims.Select(item => item.Value).ToList(),
+                Claims = userClaims,
                 Roles = userRoles.ToList()
             };
 
@@ -273,6 +274,7 @@ namespace SchoolManagement.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "DeleteRolePolicy")]
         public async Task<IActionResult> DeleteRole(string id)
         {
             var role = await _roleManager.FindByIdAsync(id);
@@ -313,6 +315,7 @@ namespace SchoolManagement.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "EditRolePolicy")]
         public async Task<IActionResult> ManageUserRoles(string userId)
         {
             ViewBag.userId = userId;
@@ -339,6 +342,7 @@ namespace SchoolManagement.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "EditRolePolicy")]
         public async Task<IActionResult> ManageUserRoles(List<RolesInUserViewModel> model, string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -420,7 +424,7 @@ namespace SchoolManagement.Controllers
 
             result = await _userManager.AddClaimsAsync(user,
                 model.Claims.Where(item => item.IsSelected)
-                    .Select(item2 => new Claim(item2.ClaimType, item2.ClaimType)));
+                    .Select(item2 => new Claim(item2.ClaimType, item2.IsSelected ? "true" : "false")));
 
             if (!result.Succeeded)
             {
@@ -429,6 +433,12 @@ namespace SchoolManagement.Controllers
             }
 
             return RedirectToAction("EditUser", new {Id = model.UserId});
+        }
+
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }
