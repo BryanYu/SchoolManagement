@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 
 namespace SchoolManagement.ViewModels
@@ -19,5 +21,9 @@ namespace SchoolManagement.ViewModels
 
         [Display(Name = "記住我")]
         public bool RememberMe{ get; set; }
+
+        public string ReturnUrl { get; set; }
+
+        public List<AuthenticationScheme> ExternalLogins { get; set; }
     }
 }

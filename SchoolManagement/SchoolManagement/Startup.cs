@@ -11,6 +11,7 @@ using System.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -41,8 +42,10 @@ namespace SchoolManagement
             services.AddScoped<IStudentRepository, SQLStudentRepository>();
             services.AddDbContextPool<AppDbContext>(option =>
                 option.UseSqlServer(_config.GetConnectionString("StudentDBConnection")));
-            services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<AppDbContext>()
-                .AddErrorDescriber<CustomIdentityErrorDescriber>();
+            services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddErrorDescriber<CustomIdentityErrorDescriber>()
+                .AddDefaultTokenProviders();
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("DeleteRolePolicy", policy => policy.RequireClaim("Delete Role"));
@@ -61,7 +64,17 @@ namespace SchoolManagement
             services.AddHttpContextAccessor();
             services.AddSingleton<IAuthorizationHandler, CanEditOnlyOtherAdminRolesAndClaimsHandler>();
             services.AddSingleton<IAuthorizationHandler, SuperAdminHandler>();
+            services.AddAuthentication().AddMicrosoftAccount(options =>
+            {
+                options.ClientId = _config["Authentication:Microsoft:ClientId"];
+                options.ClientSecret = _config["Authentication:Microsoft:ClientSecret"];
+            }).AddGitHub(option =>
+            {
+                option.ClientId = _config["Authentication:Github:ClientId"];
+                option.ClientSecret = _config["Authentication:Github:ClientSecret"];
+            });
 
+            services.Configure<IdentityOptions>(options => options.SignIn.RequireConfirmedEmail = true);
         }
 
         private bool AuthorizeAccess(AuthorizationHandlerContext context)
