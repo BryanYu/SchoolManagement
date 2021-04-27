@@ -250,9 +250,9 @@ namespace SchoolManagement.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ResetPassword(string userId, string token)
+        public async Task<IActionResult> ResetPassword(string email, string token)
         {
-            if (userId == null || token == null)
+            if (email == null || token == null)
             {
                 ModelState.AddModelError("", "無效的Token");
             }
@@ -330,8 +330,8 @@ namespace SchoolManagement.Controllers
                 var user = await _userManager.FindByEmailAsync(model.Email);
                 if (user != null && !await _userManager.IsEmailConfirmedAsync(user))
                 {
-                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    var resetLink = Url.Action("ResetPassword", "Account", new { userId = user.Id, token = token },
+                    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                    var resetLink = Url.Action("ResetPassword", "Account", new { email = model.Email, token = token },
                         Request.Scheme);
                     ViewBag.Message = "如果你在系統已註冊帳戶，我們已發送郵件到信箱，請前往重置密碼";
                     return View("ForgotPasswordConfirmation", ViewBag.Message);
