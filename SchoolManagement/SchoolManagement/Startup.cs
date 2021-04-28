@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Routing;
@@ -19,6 +20,7 @@ using SchoolManagement.DataRepositories;
 using SchoolManagement.Infrastructure;
 using SchoolManagement.Models;
 using SchoolManagement.Security;
+using SchoolManagement.Security.CustomTokenProvider;
 
 namespace SchoolManagement
 {
@@ -45,7 +47,9 @@ namespace SchoolManagement
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddErrorDescriber<CustomIdentityErrorDescriber>()
-                .AddDefaultTokenProviders();
+                .AddDefaultTokenProviders()
+                .AddTokenProvider<CustomEmailConfirmationTokenProvider<ApplicationUser>>("CustomEmailConfirmation");
+                
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("DeleteRolePolicy", policy => policy.RequireClaim("Delete Role"));
@@ -74,7 +78,19 @@ namespace SchoolManagement
                 option.ClientSecret = _config["Authentication:Github:ClientSecret"];
             });
 
-            services.Configure<IdentityOptions>(options => options.SignIn.RequireConfirmedEmail = true);
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.SignIn.RequireConfirmedEmail = true;
+                options.Tokens.EmailConfirmationTokenProvider = "CustomEmailConfirmation";
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+            });
+
+
+            services.Configure<CustomEmailConfirmationTokenProviderOptions>(item =>
+                item.TokenLifespan = TimeSpan.FromHours(5));
+            
+            services.AddSingleton<DataProtectionPurposeStrings>();
         }
 
         private bool AuthorizeAccess(AuthorizationHandlerContext context)

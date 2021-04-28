@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SchoolManagement.Models
 {
@@ -13,6 +14,9 @@ namespace SchoolManagement.Models
         public string Email { get; set; }
 
         public string PhotoPath { get; set; }
+
+        [NotMapped]
+        public string EncryptedId { get; set; }
 
     }
 }

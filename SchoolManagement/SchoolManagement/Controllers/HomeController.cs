@@ -1,14 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SchoolManagement.DataRepositories;
 using SchoolManagement.Models;
+using SchoolManagement.Security;
 using SchoolManagement.ViewModels;
 
 namespace SchoolManagement.Controllers
@@ -17,16 +20,23 @@ namespace SchoolManagement.Controllers
     {
         private readonly IStudentRepository _studentRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IDataProtector _dataProtector;
 
-        public HomeController(IStudentRepository studentRepository, IWebHostEnvironment webHostEnvironment)
+        public HomeController(IStudentRepository studentRepository, 
+            IWebHostEnvironment webHostEnvironment, IDataProtectionProvider dataProtectionProvider, DataProtectionPurposeStrings dataProtectionPurposeStrings)
         {
             _studentRepository = studentRepository;
             _webHostEnvironment = webHostEnvironment;
+            _dataProtector = dataProtectionProvider.CreateProtector(dataProtectionPurposeStrings.StudentIdRouteValue);
         }
 
         public ViewResult Index()
         {
-            var students = this._studentRepository.GetAllStudents();
+            var students = this._studentRepository.GetAllStudents().Select(item =>
+            {
+                item.EncryptedId = _dataProtector.Protect(item.Id.ToString());
+                return item;
+            });
             return View(students);
         }
 
@@ -67,9 +77,11 @@ namespace SchoolManagement.Controllers
 
         }
 
-        public ViewResult Details(int id)
+        public ViewResult Details(string id)
         {
-            var student = this._studentRepository.GetStudentById(id);
+            var decryptedId = _dataProtector.Unprotect(id);
+            var decryptStudentId = Convert.ToInt32(decryptedId);
+            var student = this._studentRepository.GetStudentById(decryptStudentId);
             if (student == null)
             {
                 ViewBag.ErrorMessage = $"學生Id={id}資料不存在";
@@ -135,9 +147,7 @@ namespace SchoolManagement.Controllers
 
             return View(model);
         }
-
         
-
         private string ProcessUploadedFile(StudentEditViewModel model)
         {
             string uniqueFileName = null;

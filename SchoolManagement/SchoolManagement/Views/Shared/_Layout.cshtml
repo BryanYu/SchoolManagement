@@ -49,6 +49,7 @@
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                             <a class="dropdown-item" asp-controller="Admin" asp-action="ListUsers">用戶列表</a>
                             <a class="dropdown-item" asp-controller="Admin" asp-action="ListRoles">角色列表</a>
+                            <a class="dropdown-item" asp-controller="Account" asp-action="ChangePassword">密碼管理</a>
                         </div>
                     </li>
                 }
@@ -58,7 +59,7 @@
                 {
                     <li class="nav-item">
                         <form method="post" asp-controller="Account" asp-action="Logout">
-                            <button type="submit" style="width: auto" class="nav-link btn btn-link py-0">註銷 @User.Identity.Name</button>
+                            <button type="submit" style="width: auto" class="nav-link btn btn-link py-0">登出 @User.Identity.Name</button>
                         </form>
                     </li>
                 }
