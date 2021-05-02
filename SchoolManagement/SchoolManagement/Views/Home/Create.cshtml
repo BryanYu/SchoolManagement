@@ -1,6 +1,7 @@
 ﻿@using SchoolManagement.Models
 @using SchoolManagement.DataRepositories
-@inject IStudentRepository _studentRepository
+@using SchoolManagement.Infrastructure.Repositories
+@inject IRepository<Student, int> _studentRepository;
 @model StudentCreateViewModel
 @{
     ViewBag.Title = "創建學生信息";
@@ -48,7 +49,7 @@
     
     <div class="form-group row">
         <div class="col-sm-10">
-            學生總人數: @_studentRepository.GetAllStudents().Count().ToString()
+            學生總人數: @_studentRepository.Count().ToString()
         </div>
     </div>
     @section Scripts

@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using SchoolManagement.Application;
 using SchoolManagement.DataRepositories;
 using SchoolManagement.Infrastructure;
 using SchoolManagement.Infrastructure.Repositories;
@@ -94,6 +95,7 @@ namespace SchoolManagement
             services.AddSingleton<DataProtectionPurposeStrings>();
 
             services.AddTransient(typeof(IRepository<,>), typeof(RepositoryBase<,>));
+            services.AddScoped<IStudentService, StudentService>();
         }
 
         private bool AuthorizeAccess(AuthorizationHandlerContext context)

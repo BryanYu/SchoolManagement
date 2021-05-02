@@ -3,41 +3,55 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using SchoolManagement.DataRepositories;
+using SchoolManagement.Infrastructure.Repositories;
 using SchoolManagement.Models;
 using SchoolManagement.Security;
 using SchoolManagement.ViewModels;
+using System.Linq.Dynamic.Core;
+using SchoolManagement.Application;
+using SchoolManagement.Application.Dtos;
+
 
 namespace SchoolManagement.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly IStudentRepository _studentRepository;
+        private readonly IRepository<Student, int> _studentRepository;
+        private readonly IStudentService _studentService;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IDataProtector _dataProtector;
 
-        public HomeController(IStudentRepository studentRepository, 
-            IWebHostEnvironment webHostEnvironment, IDataProtectionProvider dataProtectionProvider, DataProtectionPurposeStrings dataProtectionPurposeStrings)
+        public HomeController(IRepository<Student, int> studentRepository, 
+            IWebHostEnvironment webHostEnvironment, 
+            IDataProtectionProvider dataProtectionProvider, 
+            DataProtectionPurposeStrings dataProtectionPurposeStrings, 
+            IStudentService studentService
+        )
         {
             _studentRepository = studentRepository;
             _webHostEnvironment = webHostEnvironment;
             _dataProtector = dataProtectionProvider.CreateProtector(dataProtectionPurposeStrings.StudentIdRouteValue);
+            _studentService = studentService;
         }
 
-        public ViewResult Index()
+        public async Task<ViewResult> Index(string searchString, int currentPage = 1, string sortBy = "Id")
         {
-            var students = this._studentRepository.GetAllStudents().Select(item =>
+            ViewBag.CurrentFilter = searchString = searchString?.Trim();
+            var paginationModel = new PaginationModel();
+            paginationModel.Count = await _studentRepository.CountAsync();
+            paginationModel.CurrentPage = currentPage;
+            paginationModel.PageSize = 2;
+
+            var student = await _studentService.GetPaginatedResult(paginationModel.CurrentPage, searchString, sortBy, paginationModel.PageSize);
+            paginationModel.Data = student.Select(item =>
             {
                 item.EncryptedId = _dataProtector.Protect(item.Id.ToString());
                 return item;
-            });
-            return View(students);
+            }).ToList();
+            return View(paginationModel);
         }
 
         [HttpGet]
@@ -68,10 +82,12 @@ namespace SchoolManagement.Controllers
                     Name = model.Name,
                     Email = model.Email,
                     Major = model.Major,
-                    PhotoPath = uniqueFileName
+                    PhotoPath = uniqueFileName,
+                    EnrollmentDate = model.EnrollmentDate
                 };
                 Student newStudent = _studentRepository.Insert(student);
-                return RedirectToAction("Details", new { id = newStudent.Id });
+                var encryptedId = _dataProtector.Protect(newStudent.Id.ToString());
+                return RedirectToAction("Details", new { id = encryptedId });
             }
             return View();
 
@@ -79,9 +95,7 @@ namespace SchoolManagement.Controllers
 
         public ViewResult Details(string id)
         {
-            var decryptedId = _dataProtector.Unprotect(id);
-            var decryptStudentId = Convert.ToInt32(decryptedId);
-            var student = this._studentRepository.GetStudentById(decryptStudentId);
+            var student = DecryptedStudent(id);
             if (student == null)
             {
                 ViewBag.ErrorMessage = $"學生Id={id}資料不存在";
@@ -99,9 +113,9 @@ namespace SchoolManagement.Controllers
         }
 
         [HttpGet]
-        public ViewResult Edit(int id)
+        public ViewResult Edit(string id)
         {
-            var student = _studentRepository.GetStudentById(id);
+            var student = DecryptedStudent(id);
             if (student == null)
             {
                 ViewBag.ErrorMessage = $"學生Id={id}資料不存在";
@@ -109,11 +123,12 @@ namespace SchoolManagement.Controllers
             }
             var viewModel = new StudentEditViewModel
             {
-                Id = student.Id,
+                Id = id,
                 Name = student.Name,
                 Email = student.Email,
                 Major = student.Major,
-                ExistingPhotoPath = student.PhotoPath
+                ExistingPhotoPath = student.PhotoPath,
+                EnrollmentDate = student.EnrollmentDate
             };
 
             return View(viewModel);
@@ -124,12 +139,13 @@ namespace SchoolManagement.Controllers
         {
             if (ModelState.IsValid)
             {
-                var student = _studentRepository.GetStudentById(model.Id);
+                var student = DecryptedStudent(model.Id);
                 student.Name = model.Name;
                 student.Email = model.Email;
                 student.Major = model.Major;
+                student.EnrollmentDate = model.EnrollmentDate;
 
-                if (model.Photos.Count > 0)
+                if (model.Photos != null && model.Photos.Count > 0)
                 {
                     if (model.ExistingPhotoPath != null)
                     {
@@ -147,7 +163,21 @@ namespace SchoolManagement.Controllers
 
             return View(model);
         }
-        
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var student = await _studentRepository.FirstOrDefaultAsync(item => item.Id == id);
+            if (student == null)
+            {
+                ViewBag.ErrorMessage = $"找不到id為{id}的資料";
+                return View("NotFound");
+            }
+
+            await _studentRepository.DeleteAsync(item => item.Id == id);
+            return RedirectToAction("Index");
+        }
+
         private string ProcessUploadedFile(StudentEditViewModel model)
         {
             string uniqueFileName = null;
@@ -165,6 +195,14 @@ namespace SchoolManagement.Controllers
                 }
             }
             return uniqueFileName;
+        }
+
+        private Student DecryptedStudent(string id)
+        {
+            var decryptedId = _dataProtector.Unprotect(id);
+            var decryptStudentId = Convert.ToInt32(decryptedId);
+            var student = this._studentRepository.FirstOrDefault(item => item.Id == decryptStudentId);
+            return student;
         }
     }
 }

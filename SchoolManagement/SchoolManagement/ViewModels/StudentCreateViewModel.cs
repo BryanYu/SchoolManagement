@@ -27,5 +27,8 @@ namespace SchoolManagement.ViewModels
 
         [Display(Name = "頭像")]
         public List<IFormFile> Photos { get; set; }
+
+        [Display(Name = "入學時間")]
+        public DateTime EnrollmentDate { get; set; }
     }
 }
