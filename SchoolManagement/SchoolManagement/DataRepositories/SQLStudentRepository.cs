@@ -43,7 +43,14 @@ namespace SchoolManagement.DataRepositories
 
         public Student Delete(int id)
         {
-            throw new NotImplementedException();
+            var student = _context.Students.Find(id);
+            if (student != null)
+            {
+                _context.Students.Remove(student);
+                _context.SaveChanges();
+            }
+
+            return student;
         }
     }
 }

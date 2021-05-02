@@ -18,6 +18,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SchoolManagement.DataRepositories;
 using SchoolManagement.Infrastructure;
+using SchoolManagement.Infrastructure.Repositories;
 using SchoolManagement.Models;
 using SchoolManagement.Security;
 using SchoolManagement.Security.CustomTokenProvider;
@@ -91,6 +92,8 @@ namespace SchoolManagement
                 item.TokenLifespan = TimeSpan.FromHours(5));
             
             services.AddSingleton<DataProtectionPurposeStrings>();
+
+            services.AddTransient(typeof(IRepository<,>), typeof(RepositoryBase<,>));
         }
 
         private bool AuthorizeAccess(AuthorizationHandlerContext context)
